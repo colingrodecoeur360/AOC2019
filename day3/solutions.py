@@ -26,16 +26,14 @@ def compute_points_crossed(wire):
 
 
 def compute_distance_of_closest_intersection(wires):
-    points_crossed1 = compute_points_crossed(wires[0])
-    points_crossed2 = compute_points_crossed(wires[1])
+    points_crossed1, points_crossed2 = [compute_points_crossed(wire) for wire in wires]
     intersections = [point for point in points_crossed1 if point in points_crossed2]
     manhattan_distances = [abs(point[0]) + abs(point[1]) for point in intersections]
     return min(manhattan_distances)
 
 
 def compute_minimum_total_steps_to_intersection(wires):
-    points_crossed1 = compute_points_crossed(wires[0])
-    points_crossed2 = compute_points_crossed(wires[1])
+    points_crossed1, points_crossed2 = [compute_points_crossed(wire) for wire in wires]
     intersections = [point for point in points_crossed1 if point in points_crossed2]
     intersections_total_steps = [points_crossed1[point] + points_crossed2[point] for point in intersections]
     return min(intersections_total_steps)
