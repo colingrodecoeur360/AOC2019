@@ -1,0 +1,29 @@
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import unittest
+from day2.solutions import compute_intcode
+
+
+class Day2(unittest.TestCase):
+    def test_compute_intcode(self):
+        self.assertEqual(compute_intcode(
+            [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50]),
+            [3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50])
+        self.assertEqual(compute_intcode(
+            [1, 0, 0, 0, 99]),
+            [2, 0, 0, 0, 99])
+        self.assertEqual(compute_intcode(
+            [2, 3, 0, 3, 99]),
+            [2, 3, 0, 6, 99])
+        self.assertEqual(compute_intcode(
+            [2, 4, 4, 5, 99, 0]),
+            [2, 4, 4, 5, 99, 9801])
+        self.assertEqual(compute_intcode(
+            [1, 1, 1, 4, 99, 5, 6, 0, 99]),
+            [30, 1, 1, 4, 2, 5, 6, 0, 99])
+
+
+if __name__ == '__main__':
+    unittest.main()
