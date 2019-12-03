@@ -4,6 +4,10 @@ def load_input():
     return [line.strip().split(",") for line in lines]
 
 
+VERTICAL_MOVES = {"U": 1, "D": -1}
+HORIZONTAL_MOVES = {"R": 1, "L": -1}
+
+
 def compute_points_crossed(wire):
     points_crossed = dict()
     steps = 0
@@ -11,16 +15,12 @@ def compute_points_crossed(wire):
     for move in wire:
         direction = move[0]
         distance = int(move[1:])
+        vertical_move = VERTICAL_MOVES.get(direction, 0)
+        horizontal_move = HORIZONTAL_MOVES.get(direction, 0)
         for step in range(distance):
             steps += 1
-            if direction == "U":
-                y += 1
-            if direction == "D":
-                y -= 1
-            if direction == "R":
-                x += 1
-            if direction == "L":
-                x -= 1
+            y += vertical_move
+            x += horizontal_move
             points_crossed[(x, y)] = points_crossed.get((x, y)) or steps
     return points_crossed
 
