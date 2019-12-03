@@ -11,26 +11,17 @@ def compute_points_crossed(wire):
     for move in wire:
         direction = move[0]
         distance = int(move[1:])
-        if direction == "U":
-            for step in range(distance):
-                steps += 1
-                points_crossed[(x, y + step + 1)] = points_crossed.get((x, y + step + 1)) or steps
-            y += distance
-        if direction == "D":
-            for step in range(distance):
-                steps += 1
-                points_crossed[(x, y - step - 1)] = points_crossed.get((x, y - step - 1)) or steps
-            y -= distance
-        if direction == "R":
-            for step in range(distance):
-                steps += 1
-                points_crossed[(x + step + 1, y)] = points_crossed.get((x + step + 1, y)) or steps
-            x += distance
-        if direction == "L":
-            for step in range(distance):
-                steps += 1
-                points_crossed[(x - step - 1, y)] = points_crossed.get((x - step - 1, y)) or steps
-            x -= distance
+        for step in range(distance):
+            steps += 1
+            if direction == "U":
+                y += 1
+            if direction == "D":
+                y -= 1
+            if direction == "R":
+                x += 1
+            if direction == "L":
+                x -= 1
+            points_crossed[(x, y)] = points_crossed.get((x, y)) or steps
     return points_crossed
 
 
