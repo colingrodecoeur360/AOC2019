@@ -12,47 +12,51 @@ def compute_intcode(numbers, input_integer):
         operation = numbers[position] % 100
         parameters = [int(x) for x in reversed(str(numbers[position] // 100).zfill(3))]
         if operation == 1:
-            argument1 = numbers[numbers[position + 1]] if parameters[0] == 0 else numbers[position + 1]
-            argument2 = numbers[numbers[position + 2]] if parameters[1] == 0 else numbers[position + 2]
-            numbers[numbers[position + 3]] = argument1 + argument2
+            arguments = parse_n_arguments(numbers, position, parameters, 2)
+            numbers[numbers[position + 3]] = arguments[0] + arguments[1]
             position += 4
         elif operation == 2:
-            argument1 = numbers[numbers[position + 1]] if parameters[0] == 0 else numbers[position + 1]
-            argument2 = numbers[numbers[position + 2]] if parameters[1] == 0 else numbers[position + 2]
-            numbers[numbers[position + 3]] = argument1 * argument2
+            arguments = parse_n_arguments(numbers, position, parameters, 2)
+            numbers[numbers[position + 3]] = arguments[0] * arguments[1]
             position += 4
         elif operation == 3:
             numbers[numbers[position + 1]] = input_integer
             position += 2
         elif operation == 4:
-            argument = numbers[numbers[position + 1]] if parameters[0] == 0 else numbers[position + 1]
-            output = argument
+            output = parse_argument(numbers, position, parameters, 0)
             position += 2
         elif operation == 5:
-            argument1 = numbers[numbers[position + 1]] if parameters[0] == 0 else numbers[position + 1]
-            argument2 = numbers[numbers[position + 2]] if parameters[1] == 0 else numbers[position + 2]
-            if argument1 != 0:
-                position = argument2
+            arguments = parse_n_arguments(numbers, position, parameters, 2)
+            if arguments[0] != 0:
+                position = arguments[1]
             else:
                 position += 3
         elif operation == 6:
-            argument1 = numbers[numbers[position + 1]] if parameters[0] == 0 else numbers[position + 1]
-            argument2 = numbers[numbers[position + 2]] if parameters[1] == 0 else numbers[position + 2]
-            if argument1 == 0:
-                position = argument2
+            arguments = parse_n_arguments(numbers, position, parameters, 2)
+            if arguments[0] == 0:
+                position = arguments[1]
             else:
                 position += 3
         elif operation == 7:
-            argument1 = numbers[numbers[position + 1]] if parameters[0] == 0 else numbers[position + 1]
-            argument2 = numbers[numbers[position + 2]] if parameters[1] == 0 else numbers[position + 2]
-            numbers[numbers[position + 3]] = 1 if argument1 < argument2 else 0
+            arguments = parse_n_arguments(numbers, position, parameters, 2)
+            numbers[numbers[position + 3]] = 1 if arguments[0] < arguments[1] else 0
             position += 4
         elif operation == 8:
-            argument1 = numbers[numbers[position + 1]] if parameters[0] == 0 else numbers[position + 1]
-            argument2 = numbers[numbers[position + 2]] if parameters[1] == 0 else numbers[position + 2]
-            numbers[numbers[position + 3]] = 1 if argument1 == argument2 else 0
+            arguments = parse_n_arguments(numbers, position, parameters, 2)
+            numbers[numbers[position + 3]] = 1 if arguments[0] == arguments[1] else 0
             position += 4
+        else:
+            print("Unsupported operation", operation)
+            return
     return output
+
+
+def parse_argument(numbers, position, parameters, index):
+    return numbers[numbers[position + index + 1]] if parameters[index] == 0 else numbers[position + index + 1]
+
+
+def parse_n_arguments(numbers, position, parameters, n):
+    return [parse_argument(numbers, position, parameters, index) for index in range(n)]
 
 
 if __name__ == "__main__":
