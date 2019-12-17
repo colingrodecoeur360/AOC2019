@@ -1,8 +1,3 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import unittest
 from day3.solutions import compute_distance_of_closest_intersection, compute_minimum_total_steps_to_intersection
 

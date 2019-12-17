@@ -1,8 +1,3 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import unittest
 from day4.solutions import meets_condition_part_1, meets_condition_part_2, has_isolated_zero
 
