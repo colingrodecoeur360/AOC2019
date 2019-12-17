@@ -41,16 +41,20 @@ class JumpIfTrueInstruction(Instruction):
     number_of_arguments = 2
 
     def execute(self, intcode, arguments):
-        new_position = intcode.position + self.number_of_arguments + 1 if arguments[0].value == 0 else arguments[1].value
-        intcode.update_position(new_position)
+        if arguments[0].value == 0:
+            intcode.update_position(intcode.position + self.number_of_arguments + 1)
+        else:
+            intcode.update_position(arguments[1].value)
 
 
 class JumpIfFalseInstruction(Instruction):
     number_of_arguments = 2
 
     def execute(self, intcode, arguments):
-        new_position = intcode.position + self.number_of_arguments + 1 if arguments[0].value != 0 else arguments[1].value
-        intcode.update_position(new_position)
+        if arguments[0].value != 0:
+            intcode.update_position(intcode.position + self.number_of_arguments + 1)
+        else:
+            intcode.update_position(arguments[1].value)
 
 
 class IsLessThanInstruction(Instruction):
@@ -98,11 +102,10 @@ class Argument(object):
 class Intcode(object):
     def __init__(self, program, inputs=None):
         self.program = program.copy()
-        self.stopped = False
-        self.output = None
-        self.position = 0
         self.inputs = inputs if inputs else []
         self.output = None
+        self.position = 0
+        self.stopped = False
 
     def get_arguments(self, number_of_arguments):
         arguments = []
@@ -116,12 +119,19 @@ class Intcode(object):
         return arguments
 
     def run(self):
-        while not self.stopped:
+        self.output = None
+        while not self.stopped and self.output is None:
             opcode = self.program[self.position] % 100
             instruction = instructions[opcode]()
             arguments = self.get_arguments(instruction.number_of_arguments)
             instruction.execute(self, arguments)
         return self.output
+
+    def execute(self):
+        output = None
+        while not self.stopped:
+            output = self.run()
+        return output
 
     def set(self, position, value):
         self.program[position] = value
@@ -131,3 +141,6 @@ class Intcode(object):
 
     def update_position(self, position):
         self.position = position
+
+    def add_input(self, value):
+        self.inputs = [value] + self.inputs

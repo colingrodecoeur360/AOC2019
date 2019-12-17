@@ -1,4 +1,5 @@
 from itertools import permutations
+from intcode import Intcode
 
 
 def load_input():
@@ -8,101 +9,63 @@ def load_input():
 
 
 class Amplifier(object):
-    def __init__(self, phase, program):
+    def __init__(self, program, phase):
+        self.computer = Intcode(program, [phase])
         self.phase = phase
-        self.program = program.copy()
-        self.position = 0
-        self.has_already_used_phase = False
-        self.has_reached_stop_opcode = False
-        self.output = None
-
-    def compute_intcode(self, input_integer):
-        position = self.position
-        program = self.program
-        output = None
-        while program[position] % 100 != 99:
-            operation = program[position] % 100
-            parameters = [int(x) for x in reversed(str(program[position] // 100).zfill(3))]
-            if operation == 1:
-                arguments = parse_n_arguments(program, position, parameters, 2)
-                program[program[position + 3]] = arguments[0] + arguments[1]
-                position += 4
-            elif operation == 2:
-                arguments = parse_n_arguments(program, position, parameters, 2)
-                program[program[position + 3]] = arguments[0] * arguments[1]
-                position += 4
-            elif operation == 3:
-                if self.has_already_used_phase:
-                    program[program[position + 1]] = input_integer
-                else:
-                    program[program[position + 1]] = self.phase
-                    self.has_already_used_phase = True
-                position += 2
-            elif operation == 4:
-                output = parse_argument(program, position, parameters, 0)
-                position += 2
-                self.program = program
-                self.position = position
-                self.output = output
-                return output
-            elif operation == 5:
-                arguments = parse_n_arguments(program, position, parameters, 2)
-                if arguments[0] != 0:
-                    position = arguments[1]
-                else:
-                    position += 3
-            elif operation == 6:
-                arguments = parse_n_arguments(program, position, parameters, 2)
-                if arguments[0] == 0:
-                    position = arguments[1]
-                else:
-                    position += 3
-            elif operation == 7:
-                arguments = parse_n_arguments(program, position, parameters, 2)
-                program[program[position + 3]] = 1 if arguments[0] < arguments[1] else 0
-                position += 4
-            elif operation == 8:
-                arguments = parse_n_arguments(program, position, parameters, 2)
-                program[program[position + 3]] = 1 if arguments[0] == arguments[1] else 0
-                position += 4
-            else:
-                print("Unsupported operation", operation)
-                return
-        self.has_reached_stop_opcode = True
-        return output
-
-
-def parse_argument(program, position, parameters, index):
-    return program[program[position + index + 1]] if parameters[index] == 0 else program[position + index + 1]
-
-
-def parse_n_arguments(program, position, parameters, n):
-    return [parse_argument(program, position, parameters, index) for index in range(n)]
 
 
 def amplify_signal_part1(program, phases, input_number):
-    out = input_number
-    for i in range(5):
-        a = Amplifier(phases[i], program)
-        out = a.compute_intcode(out)
-    return out
+    a0 = Amplifier(program, phases[0])
+    a1 = Amplifier(program, phases[1])
+    a2 = Amplifier(program, phases[2])
+    a3 = Amplifier(program, phases[3])
+    a4 = Amplifier(program, phases[4])
+
+    a0.computer.add_input(input_number)
+    out0 = a0.computer.run()
+
+    a1.computer.add_input(out0)
+    out1 = a1.computer.run()
+
+    a2.computer.add_input(out1)
+    out2 = a2.computer.run()
+
+    a3.computer.add_input(out2)
+    out3 = a3.computer.run()
+
+    a4.computer.add_input(out3)
+    out4 = a4.computer.run()
+
+    return out4
 
 
 def amplify_signal_part2(program, phases, input_number):
-    a0 = Amplifier(phases[0], program)
-    a1 = Amplifier(phases[1], program)
-    a2 = Amplifier(phases[2], program)
-    a3 = Amplifier(phases[3], program)
-    a4 = Amplifier(phases[4], program)
+    a0 = Amplifier(program, phases[0])
+    a1 = Amplifier(program, phases[1])
+    a2 = Amplifier(program, phases[2])
+    a3 = Amplifier(program, phases[3])
+    a4 = Amplifier(program, phases[4])
 
-    out = input_number
-    while not a4.has_reached_stop_opcode:
-        out = a0.compute_intcode(out)
-        out = a1.compute_intcode(out)
-        out = a2.compute_intcode(out)
-        out = a3.compute_intcode(out)
-        out = a4.compute_intcode(out)
-    return a4.output
+    a0.computer.add_input(input_number)
+    out0 = a0.computer.run()
+
+    while not a0.computer.stopped:
+        a1.computer.add_input(out0)
+        out1 = a1.computer.run()
+
+        a2.computer.add_input(out1)
+        out2 = a2.computer.run()
+
+        a3.computer.add_input(out2)
+        out3 = a3.computer.run()
+
+        a4.computer.add_input(out3)
+        out4 = a4.computer.run()
+
+        a0.computer.add_input(out4)
+        out0 = a0.computer.run()
+
+    return a4.computer.output
 
 
 if __name__ == "__main__":
