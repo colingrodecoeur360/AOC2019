@@ -1,51 +1,33 @@
 import unittest
-from day5.solutions import compute_intcode
+from intcode import Intcode
 
 
-def parse_instructions(instructions):
-    return [int(x) for x in instructions.strip().split(",")]
+test_cases = [
+    {"program": [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8],
+     "tests": [([7], 0), ([8], 1), ([9], 0)]},
+    {"program": [3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8],
+     "tests": [([7], 1), ([8], 0), ([9], 0)]},
+    {"program": [3, 3, 1108, -1, 8, 3, 4, 3, 99],
+     "tests": [([7], 0), ([8], 1), ([9], 0)]},
+    {"program": [3, 3, 1107, -1, 8, 3, 4, 3, 99],
+     "tests": [([7], 1), ([8], 0), ([9], 0)]},
+    {"program": [3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9],
+     "tests": [([0], 0), ([1], 1), ([-1], 1), ([12], 1)]},
+    {"program": [3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1],
+     "tests": [([0], 0), ([1], 1), ([-1], 1), ([12], 1)]},
+    {"program": [3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36, 98, 0, 0, 1002, 21,
+                 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99],
+     "tests": [([7], 999), ([8], 1000), ([9], 1001)]},
+]
 
 
 class Day5(unittest.TestCase):
-    def test_compute_intcode(self):
-        self.assertEqual(0, compute_intcode(parse_instructions("3,9,8,9,10,9,4,9,99,-1,8"), 7))
-        self.assertEqual(1, compute_intcode(parse_instructions("3,9,8,9,10,9,4,9,99,-1,8"), 8))
-        self.assertEqual(0, compute_intcode(parse_instructions("3,9,8,9,10,9,4,9,99,-1,8"), 9))
-
-        self.assertEqual(1, compute_intcode(parse_instructions("3,9,7,9,10,9,4,9,99,-1,8"), 7))
-        self.assertEqual(0, compute_intcode(parse_instructions("3,9,7,9,10,9,4,9,99,-1,8"), 8))
-        self.assertEqual(0, compute_intcode(parse_instructions("3,9,7,9,10,9,4,9,99,-1,8"), 9))
-
-        self.assertEqual(0, compute_intcode(parse_instructions("3,3,1108,-1,8,3,4,3,99"), 7))
-        self.assertEqual(1, compute_intcode(parse_instructions("3,3,1108,-1,8,3,4,3,99"), 8))
-        self.assertEqual(0, compute_intcode(parse_instructions("3,3,1108,-1,8,3,4,3,99"), 9))
-
-        self.assertEqual(1, compute_intcode(parse_instructions("3,3,1107,-1,8,3,4,3,99"), 7))
-        self.assertEqual(0, compute_intcode(parse_instructions("3,3,1107,-1,8,3,4,3,99"), 8))
-        self.assertEqual(0, compute_intcode(parse_instructions("3,3,1107,-1,8,3,4,3,99"), 9))
-
-        self.assertEqual(0, compute_intcode(parse_instructions("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9"), 0))
-        self.assertEqual(1, compute_intcode(parse_instructions("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9"), 1))
-        self.assertEqual(1, compute_intcode(parse_instructions("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9"), -1))
-        self.assertEqual(1, compute_intcode(parse_instructions("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9"), 12))
-
-        self.assertEqual(0, compute_intcode(parse_instructions("3,3,1105,-1,9,1101,0,0,12,4,12,99,1"), 0))
-        self.assertEqual(1, compute_intcode(parse_instructions("3,3,1105,-1,9,1101,0,0,12,4,12,99,1"), 1))
-        self.assertEqual(1, compute_intcode(parse_instructions("3,3,1105,-1,9,1101,0,0,12,4,12,99,1"), -1))
-        self.assertEqual(1, compute_intcode(parse_instructions("3,3,1105,-1,9,1101,0,0,12,4,12,99,1"), 12))
-
-        self.assertEqual(999, compute_intcode(parse_instructions(
-            "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,"
-            "1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,"
-            "1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"), 7))
-        self.assertEqual(1000, compute_intcode(parse_instructions(
-            "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,"
-            "1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,"
-            "1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"), 8))
-        self.assertEqual(1001, compute_intcode(parse_instructions(
-            "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,"
-            "1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,"
-            "1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"), 9))
+    def test_day5(self):
+        for test_case in test_cases:
+            for inputs, output in test_case["tests"]:
+                computer = Intcode(test_case["program"], inputs)
+                computer.run()
+                self.assertEqual(output, computer.output)
 
 
 if __name__ == '__main__':
