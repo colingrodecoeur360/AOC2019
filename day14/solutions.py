@@ -55,7 +55,7 @@ def compute_ore_requirements(puzzle_input, amount_of_fuel=1):
 
 def compute_max_amount_of_fuel(puzzle_input, available_amount_of_ore):
     lower_bound = 1
-    upper_bound = 1_000_000_000_000
+    upper_bound = available_amount_of_ore
 
     while upper_bound - lower_bound > 1:
         amount_of_fuel = (lower_bound + upper_bound) // 2
