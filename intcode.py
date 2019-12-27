@@ -118,6 +118,7 @@ class Intcode(object):
         self.relative_base = 0
         self.memory = {}
         self.stopped = False
+        self.is_waiting_for_input = False
 
     def get_arguments(self, number_of_arguments):
         arguments = []
@@ -148,6 +149,9 @@ class Intcode(object):
         self.output = None
         while not self.stopped and self.output is None:
             opcode = self.program[self.position] % 100
+            if opcode == 3 and len(self.inputs) == 0:
+                self.is_waiting_for_input = True
+                break
             instruction = instructions[opcode]()
             arguments = self.get_arguments(instruction.number_of_arguments)
             instruction.execute(self, arguments)
@@ -156,18 +160,18 @@ class Intcode(object):
         return self.output
 
     def execute(self):
-        while not self.stopped:
+        while not self.stopped and not self.is_waiting_for_input:
             self.run()
         return self.outputs[-1]
 
     def get(self, position):
-        if position > len(self.program):
+        if position >= len(self.program):
             return self.memory.get(position, 0)
         else:
             return self.program[position]
 
     def set(self, position, value):
-        if position > len(self.program):
+        if position >= len(self.program):
             self.memory[position] = value
         else:
             self.program[position] = value
@@ -182,4 +186,5 @@ class Intcode(object):
         self.relative_base += offset
 
     def add_input(self, value):
+        self.is_waiting_for_input = False
         self.inputs = [value] + self.inputs
