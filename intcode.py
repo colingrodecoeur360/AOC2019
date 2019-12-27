@@ -73,6 +73,14 @@ class IsEqualInstruction(Instruction):
         intcode.update_position(intcode.position + self.number_of_arguments + 1)
 
 
+class AdjustRelativeBaseInstruction(Instruction):
+    number_of_arguments = 1
+
+    def execute(self, intcode, arguments):
+        intcode.update_relative_base(arguments[0].value)
+        intcode.update_position(intcode.position + self.number_of_arguments + 1)
+
+
 class StopInstruction(Instruction):
     number_of_arguments = 0
 
@@ -89,6 +97,7 @@ instructions = {
     6: JumpIfFalseInstruction,
     7: IsLessThanInstruction,
     8: IsEqualInstruction,
+    9: AdjustRelativeBaseInstruction,
     99: StopInstruction
 }
 
@@ -104,18 +113,35 @@ class Intcode(object):
         self.program = program.copy()
         self.inputs = inputs if inputs else []
         self.output = None
+        self.outputs = []
         self.position = 0
+        self.relative_base = 0
+        self.memory = {}
         self.stopped = False
 
     def get_arguments(self, number_of_arguments):
         arguments = []
         modes = str(self.program[self.position])[:-2].zfill(3)[::-1]
         for i in range(number_of_arguments):
-            position = self.program[self.position + i + 1]
-            arguments.append(Argument(
-                position=position,
-                value=self.program[position] if modes[i] == "0" else position
-            ))
+            position = self.get(self.position + i + 1)
+            if modes[i] == "0":
+                argument = Argument(
+                    position=position,
+                    value=self.get(position)
+                )
+            elif modes[i] == "1":
+                argument = Argument(
+                    position=position,
+                    value=position
+                )
+            elif modes[i] == "2":
+                argument = Argument(
+                    position=position + self.relative_base,
+                    value=self.get(position + self.relative_base)
+                )
+            else:
+                raise Exception("Unsupported mode" + modes[i])
+            arguments.append(argument)
         return arguments
 
     def run(self):
@@ -125,22 +151,35 @@ class Intcode(object):
             instruction = instructions[opcode]()
             arguments = self.get_arguments(instruction.number_of_arguments)
             instruction.execute(self, arguments)
+        if self.output is not None:
+            self.outputs.append(self.output)
         return self.output
 
     def execute(self):
-        output = None
         while not self.stopped:
-            output = self.run()
-        return output
+            self.run()
+        return self.outputs[-1]
+
+    def get(self, position):
+        if position > len(self.program):
+            return self.memory.get(position, 0)
+        else:
+            return self.program[position]
 
     def set(self, position, value):
-        self.program[position] = value
+        if position > len(self.program):
+            self.memory[position] = value
+        else:
+            self.program[position] = value
 
     def get_input(self):
         return self.inputs.pop()
 
     def update_position(self, position):
         self.position = position
+
+    def update_relative_base(self, offset):
+        self.relative_base += offset
 
     def add_input(self, value):
         self.inputs = [value] + self.inputs
