@@ -188,3 +188,7 @@ class Intcode(object):
     def add_input(self, value):
         self.is_waiting_for_input = False
         self.inputs = [value] + self.inputs
+
+    def add_inputs(self, values):
+        for value in values:
+            self.add_input(value)
